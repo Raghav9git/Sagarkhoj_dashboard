@@ -1,0 +1,10 @@
+flask
+flask-cors
+torch
+torchvision
+pillow
+segmentation-models-pytorch
+opencv-python-headless
+numpy
+shapely
+requests

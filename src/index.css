@@ -1,0 +1,541 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════
+   NIGHT THEME  (default)
+═══════════════════════════════════════════════════════ */
+:root,
+[data-theme="night"] {
+  --bg-base: #0c0c0f;
+  --bg-panel: rgba(14, 15, 18, 0.78);
+  --bg-card: rgba(22, 23, 28, 0.85);
+  --bg-card-alt: rgba(18, 19, 24, 0.7);
+
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-mid: rgba(255, 255, 255, 0.11);
+
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #475569;
+  --text-dim: #334155;
+
+  --accent: #e2e8f0;
+  --accent-dim: rgba(226, 232, 240, 0.1);
+
+  --tag-bg: rgba(255, 255, 255, 0.06);
+  --tag-border: rgba(255, 255, 255, 0.1);
+
+  --clay-shadow:
+    inset 1px 1px 2px rgba(255, 255, 255, 0.06),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.5),
+    0 2px 8px rgba(0, 0, 0, 0.4);
+  --clay-shadow-hover:
+    inset 1px 1px 3px rgba(255, 255, 255, 0.09),
+    inset -2px -2px 5px rgba(0, 0, 0, 0.6),
+    0 4px 14px rgba(0, 0, 0, 0.5);
+
+  --glass-blur: 14px;
+
+  /* vessel status colors */
+  --col-tanker: #f87171;
+  --col-cargo: #fbbf24;
+  --col-other: #94a3b8;
+  --col-danger: #f87171;
+  --col-warn: #fbbf24;
+  --col-safe: #94a3b8;
+}
+
+/* ═══════════════════════════════════════════════════════
+   DAY THEME
+═══════════════════════════════════════════════════════ */
+[data-theme="day"] {
+  --bg-base: #f0f2f5;
+  --bg-panel: rgba(255, 255, 255, 0.85);
+  --bg-card: rgba(248, 250, 252, 0.95);
+  --bg-card-alt: rgba(241, 245, 249, 0.9);
+
+  --border-subtle: rgba(0, 0, 0, 0.07);
+  --border-mid: rgba(0, 0, 0, 0.11);
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --text-dim: #cbd5e1;
+
+  --accent: #0f172a;
+  --accent-dim: rgba(15, 23, 42, 0.08);
+
+  --tag-bg: rgba(0, 0, 0, 0.05);
+  --tag-border: rgba(0, 0, 0, 0.1);
+
+  --clay-shadow:
+    inset 1px 1px 2px rgba(255, 255, 255, 0.9),
+    inset -1px -1px 3px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+  --clay-shadow-hover:
+    inset 1px 1px 3px rgba(255, 255, 255, 1),
+    inset -2px -2px 5px rgba(0, 0, 0, 0.12),
+    0 4px 14px rgba(0, 0, 0, 0.15);
+
+  --col-tanker: #dc2626;
+  --col-cargo: #d97706;
+  --col-other: #64748b;
+  --col-danger: #dc2626;
+  --col-warn: #d97706;
+  --col-safe: #64748b;
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESETS
+═══════════════════════════════════════════════════════ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════════════════ */
+::-webkit-scrollbar {
+  width: 3px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-mid);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════
+   GLASS PANEL
+═══════════════════════════════════════════════════════ */
+.glass-panel {
+  background: var(--bg-panel);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-right: 1px solid var(--border-subtle);
+  transition: background 0.25s ease;
+}
+
+.glass-panel-right {
+  background: var(--bg-panel);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-left: 1px solid var(--border-subtle);
+  transition: background 0.25s ease;
+}
+
+/* ═══════════════════════════════════════════════════════
+   CLAY COMPONENTS
+═══════════════════════════════════════════════════════ */
+.clay {
+  box-shadow: var(--clay-shadow);
+  border-radius: 10px;
+  transition: box-shadow 0.2s ease;
+}
+
+.clay-btn {
+  box-shadow: var(--clay-shadow);
+  border-radius: 9px;
+  transition: box-shadow 0.18s ease, transform 0.12s ease;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  user-select: none;
+}
+
+.clay-btn:hover {
+  box-shadow: var(--clay-shadow-hover);
+}
+
+.clay-btn:active {
+  transform: scale(0.97);
+}
+
+.clay-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   DROPZONE
+═══════════════════════════════════════════════════════ */
+.dropzone {
+  border: 1.5px dashed var(--border-mid);
+  border-radius: 12px;
+  background: var(--accent-dim);
+  box-shadow: var(--clay-shadow);
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.dropzone.drag-over {
+  border-color: var(--text-secondary);
+  background: rgba(148, 163, 184, 0.1);
+}
+
+/* ═══════════════════════════════════════════════════════
+   LEAFLET OVERRIDES
+═══════════════════════════════════════════════════════ */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Night popup */
+[data-theme="night"] .leaflet-popup-content-wrapper {
+  background: rgba(12, 13, 16, 0.97) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8) !important;
+  color: #f1f5f9 !important;
+  padding: 0 !important;
+}
+
+[data-theme="night"] .leaflet-popup-tip {
+  background: rgba(12, 13, 16, 0.97) !important;
+}
+
+/* Day popup */
+[data-theme="day"] .leaflet-popup-content-wrapper {
+  background: rgba(255, 255, 255, 0.97) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.10) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18) !important;
+  color: #0f172a !important;
+  padding: 0 !important;
+}
+
+[data-theme="day"] .leaflet-popup-tip {
+  background: rgba(255, 255, 255, 0.97) !important;
+}
+
+.leaflet-popup-content-wrapper {
+  padding: 0 !important;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+}
+
+.leaflet-popup-close-button {
+  color: var(--text-muted) !important;
+  font-size: 16px !important;
+  top: 10px !important;
+  right: 12px !important;
+  width: 20px !important;
+  height: 20px !important;
+  line-height: 20px !important;
+  text-align: center;
+}
+
+.leaflet-popup-close-button:hover {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="night"] .leaflet-control-zoom a {
+  background: rgba(14, 15, 18, 0.92) !important;
+  border-color: rgba(255, 255, 255, 0.09) !important;
+  color: #cbd5e1 !important;
+}
+
+[data-theme="day"] .leaflet-control-zoom a {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  color: #334155 !important;
+}
+
+.leaflet-control-zoom a:hover {
+  opacity: 0.85 !important;
+}
+
+.leaflet-control-attribution {
+  background: transparent !important;
+  color: var(--text-dim) !important;
+  font-size: 9px !important;
+}
+
+.leaflet-control-attribution a {
+  color: var(--text-muted) !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PULSE ANIMATION (spill centroid)
+═══════════════════════════════════════════════════════ */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+
+  70% {
+    transform: scale(3);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+.pulse-ring {
+  animation: pulse-ring 2.2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+@keyframes pulse-dot {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+.pulse-dot {
+  animation: pulse-dot 1.6s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PROGRESS BAR
+═══════════════════════════════════════════════════════ */
+.progress-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border-subtle);
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ═══════════════════════════════════════════════════════
+   SCAN LINE (processing)
+═══════════════════════════════════════════════════════ */
+@keyframes scan {
+  0% {
+    top: 0;
+  }
+
+  100% {
+    top: 100%;
+  }
+}
+
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, rgba(226, 232, 240, 0.4), transparent);
+  animation: scan 1.6s linear infinite;
+}
+
+/* ═══════════════════════════════════════════════════════
+   STATUS DOT
+═══════════════════════════════════════════════════════ */
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.dot-live {
+  animation: blink 1.8s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ANIM HELPERS
+═══════════════════════════════════════════════════════ */
+@keyframes fadeIn {
+  from {
+    opacity: 0
+  }
+
+  to {
+    opacity: 1
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(6px);
+    opacity: 0
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1
+  }
+}
+
+.anim-fade {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.anim-slide {
+  animation: slideUp 0.25s ease-out;
+}
+
+/* ═══════════════════════════════════════════════════════
+   VESSEL ICON
+═══════════════════════════════════════════════════════ */
+.vessel-icon {
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.7));
+}
+
+/* ═══════════════════════════════════════════════════════
+   THEME TOGGLE SWITCH
+═══════════════════════════════════════════════════════ */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-mid);
+  box-shadow: var(--clay-shadow);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+}
+
+.theme-toggle-option {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 11px;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.theme-toggle-option.active {
+  background: var(--accent-dim);
+  color: var(--text-primary);
+  box-shadow: var(--clay-shadow);
+}
+
+.theme-toggle-option:not(.active) {
+  color: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════
+   TOOLTIP
+═══════════════════════════════════════════════════════ */
+.culprit-tooltip {
+  background: rgba(0, 0, 0, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+  padding: 4px 8px !important;
+}
+
+.culprit-tooltip::before {
+  border-right-color: rgba(0, 0, 0, 0.8) !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMPIZ REPORT DASHBOARD ANIMATIONS
+═══════════════════════════════════════════════════════ */
+@keyframes fadeOut {
+  from {
+    opacity: 1
+  }
+
+  to {
+    opacity: 0
+  }
+}
+
+@keyframes compiz-enter {
+  0% {
+    transform: scale(0.85) translateY(40px) perspective(1000px) rotateX(-5deg);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1) translateY(0) perspective(1000px) rotateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes compiz-exit {
+  0% {
+    transform: scale(1) translateY(0) perspective(1000px) rotateX(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(0.9) translateY(40px) perspective(1000px) rotateX(5deg);
+    opacity: 0;
+  }
+}
+
+.compiz-in .report-window {
+  animation: compiz-enter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
+}
+
+.compiz-out .report-window {
+  animation: compiz-exit 0.25s ease-in forwards;
+}
+
+.compiz-in .report-backdrop {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.compiz-out .report-backdrop {
+  animation: fadeOut 0.25s ease-in forwards;
+}
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes compiz-enter {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}

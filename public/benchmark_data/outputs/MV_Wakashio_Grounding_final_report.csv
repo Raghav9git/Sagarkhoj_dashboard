@@ -1,0 +1,3 @@
+Vessel,MMSI,Type,Lat,Lon,Speed_Knots,Transponder_Status,H3_Index,In_Origin_Cloud,Suspect_Score
+MV Wakashio,352746000,Bulk Carrier,-20.648582458496094,58.15829086303711,0.5,Active,88a2434547fffff,True,80
+Decoy Fisher 2,222222222,Fishing,-20.648582458496094,58.15829086303711,11.5,Active,88a2434547fffff,True,50
