@@ -1,8 +1,8 @@
 export const AISSTREAM_API_KEY = import.meta.env.VITE_AIS_API_KEY || ''
-export const AISSTREAM_WS_URL  = 'wss://stream.aisstream.io/v0/stream'
+export const AISSTREAM_WS_URL = 'wss://stream.aisstream.io/v0/stream'
 
 export const DEFAULT_MAP_CENTER = [17.0, 66.0]
-export const DEFAULT_MAP_ZOOM   = 6
+export const DEFAULT_MAP_ZOOM = 6
 
 export const AIS_SUBSCRIBE_PAYLOAD = {
   APIKey: AISSTREAM_API_KEY,
@@ -13,33 +13,33 @@ export const AIS_SUBSCRIBE_PAYLOAD = {
 // Free ESRI tiles — no API key needed
 export const TILE_URLS = {
   night: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
-  day:   'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+  day: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
 }
 export const TILE_ATTR = '&copy; <a href="https://www.esri.com/">Esri</a>'
 
 // ─── Seed vessels — spread globally across major ocean shipping lanes ─────
 export const SEED_VESSELS = [
-  { mmsi:'419123456', name:'MV Mumbai Star',       lat:18.50, lon:66.00, cog:215, sog:8.2,  shipType:80, navStatus:0, trueHeading:215 },
-  { mmsi:'232005480', name:'MSC Neptune (UK)',      lat:5.00,  lon:72.00, cog:60,  sog:18.5, shipType:70, navStatus:0, trueHeading:60  },
-  { mmsi:'538008123', name:'MT Pacific Ocean',      lat:3.00,  lon:60.00, cog:285, sog:12.3, shipType:85, navStatus:0, trueHeading:285 },
-  { mmsi:'229123456', name:'Valetta Glory (Malta)', lat:12.00, lon:55.00, cog:345, sog:10.1, shipType:71, navStatus:0, trueHeading:345 },
-  { mmsi:'566000123', name:'Lion City Carrier',     lat:20.00, lon:60.00, cog:190, sog:14.2, shipType:74, navStatus:0, trueHeading:190 },
-  { mmsi:'477987654', name:'Oriental Pearl (HK)',   lat:8.50,  lon:77.00, cog:110, sog:19.4, shipType:70, navStatus:0, trueHeading:110 },
-  { mmsi:'636012390', name:'Liberian Star',         lat:22.00, lon:64.00, cog:230, sog:11.8, shipType:82, navStatus:0, trueHeading:230 },
-  { mmsi:'370001001', name:'Panama Express',        lat:14.00, lon:70.00, cog:90,  sog:21.0, shipType:79, navStatus:0, trueHeading:90  },
-  { mmsi:'311029384', name:'Bahamas Breezer',       lat:10.50, lon:68.00, cog:30,  sog:13.5, shipType:72, navStatus:0, trueHeading:30  },
-  { mmsi:'338000999', name:'American Eagle',        lat:17.00, lon:58.00, cog:270, sog:9.8,  shipType:80, navStatus:0, trueHeading:270 },
-  { mmsi:'503111222', name:'Sydney Explorer',       lat:15.00, lon:43.00, cog:320, sog:11.5, shipType:82, navStatus:0, trueHeading:320 },
-  { mmsi:'440003333', name:'Seoul Trader',          lat:-32.0, lon:100.0, cog:115, sog:16.0, shipType:75, navStatus:0, trueHeading:115 },
+  { mmsi: '419123456', name: 'MV Mumbai Star', lat: 18.50, lon: 66.00, cog: 215, sog: 8.2, shipType: 80, navStatus: 0, trueHeading: 215 },
+  { mmsi: '232005480', name: 'MSC Neptune (UK)', lat: 5.00, lon: 72.00, cog: 60, sog: 18.5, shipType: 70, navStatus: 0, trueHeading: 60 },
+  { mmsi: '538008123', name: 'MT Pacific Ocean', lat: 3.00, lon: 60.00, cog: 285, sog: 12.3, shipType: 85, navStatus: 0, trueHeading: 285 },
+  { mmsi: '229123456', name: 'Valetta Glory (Malta)', lat: 12.00, lon: 55.00, cog: 345, sog: 10.1, shipType: 71, navStatus: 0, trueHeading: 345 },
+  { mmsi: '566000123', name: 'Lion City Carrier', lat: 20.00, lon: 60.00, cog: 190, sog: 14.2, shipType: 74, navStatus: 0, trueHeading: 190 },
+  { mmsi: '477987654', name: 'Oriental Pearl (HK)', lat: 8.50, lon: 77.00, cog: 110, sog: 19.4, shipType: 70, navStatus: 0, trueHeading: 110 },
+  { mmsi: '636012390', name: 'Liberian Star', lat: 22.00, lon: 64.00, cog: 230, sog: 11.8, shipType: 82, navStatus: 0, trueHeading: 230 },
+  { mmsi: '370001001', name: 'Panama Express', lat: 14.00, lon: 70.00, cog: 90, sog: 21.0, shipType: 79, navStatus: 0, trueHeading: 90 },
+  { mmsi: '311029384', name: 'Bahamas Breezer', lat: 10.50, lon: 68.00, cog: 30, sog: 13.5, shipType: 72, navStatus: 0, trueHeading: 30 },
+  { mmsi: '338000999', name: 'American Eagle', lat: 17.00, lon: 58.00, cog: 270, sog: 9.8, shipType: 80, navStatus: 0, trueHeading: 270 },
+  { mmsi: '503111222', name: 'Sydney Explorer', lat: 15.00, lon: 43.00, cog: 320, sog: 11.5, shipType: 82, navStatus: 0, trueHeading: 320 },
+  { mmsi: '440003333', name: 'Seoul Trader', lat: -32.0, lon: 100.0, cog: 115, sog: 16.0, shipType: 75, navStatus: 0, trueHeading: 115 },
 ]
 
 // ─── Default spill in open Arabian Sea west of Mumbai ────────────────────
 export const SPILL_CENTER = [19.0, 70.5]
 export const SPILL_POLYGON = [
-  [19.045, 70.440],[19.060, 70.490],[19.052, 70.540],
-  [19.035, 70.560],[19.010, 70.555],[18.988, 70.535],
-  [18.972, 70.505],[18.975, 70.468],[18.995, 70.440],
-  [19.020, 70.428],[19.038, 70.435],
+  [19.045, 70.440], [19.060, 70.490], [19.052, 70.540],
+  [19.035, 70.560], [19.010, 70.555], [18.988, 70.535],
+  [18.972, 70.505], [18.975, 70.468], [18.995, 70.440],
+  [19.020, 70.428], [19.038, 70.435],
 ]
 
 export const HISTORICAL_INCIDENTS = [
@@ -118,6 +118,7 @@ RANK 1: MV WAKASHIO (MMSI: 354213000) | Status: CONFIRMED CULPRIT [MATCH]
       oilType: "Heavy Fuel Oil (Very Low Sulphur)",
       anomaly: "Speed Drop to 0.0 knots (Grounding)"
     },
+    driftDirection: [0.002, 0.003],   // toward lagoon NW
     // All polygon coords confirmed in open ocean, south-east of Mauritius island
     polygon: [
       [-20.425, 57.730],
@@ -260,6 +261,7 @@ RANK 2: BEIJING (IMO: 9308508) | Status: CONFIRMED ANCHOR STRIKE [MATCH]
       oilType: "Post-Production Heavy Crude",
       anomaly: "Subsea Pipeline Rupture via Anchor Drag"
     },
+    driftDirection: [-0.001, -0.003], // northwest drift (California Current)
     // Polygon in open Pacific Ocean, west of Huntington Beach (offshore)
     polygon: [
       [33.660, -118.082],
@@ -378,6 +380,7 @@ RANK 1: MARE DORICUM (MMSI: 538012387) | Status: CONFIRMED CULPRIT [MATCH]
       oilType: "Crude Oil",
       anomaly: "Mooring Line Failure / Tsunami-induced rupture"
     },
+    driftDirection: [0.003, 0.001],   // northward Peru Current
     // Polygon in open Pacific, west of La Pampilla (offshore, not on land)
     polygon: [
       [-11.908, -77.202],
@@ -480,6 +483,7 @@ RANK 1: BOW JUBAIL (MMSI: 257321000) | Status: CONFIRMED SOURCE [MATCH]
       oilType: "Heavy Bunker Oil (HFO)",
       anomaly: "Sudden Dock Impact & Downstream River Drift"
     },
+    driftDirection: [-0.002, -0.004], // westward tidal outflow toward North Sea
     // Polygon in the North Sea estuary mouth (Hook of Holland area, open water)
     polygon: [
       [51.975, 3.978],
@@ -586,6 +590,7 @@ RANK 1: SOLO CREED (TUG) (MMSI: 677045700) | Status: CONFIRMED CULPRIT [MATCH]
       oilType: "Heavy Bunker Fuel",
       anomaly: "Transponder Blackout (Dark Fleet AIS Gap)"
     },
+    driftDirection: [-0.001, 0.003],  // WNW Caribbean drift
     // Polygon in open Caribbean Sea west of Tobago (all ocean)
     polygon: [
       [11.185, -60.862],
@@ -721,6 +726,7 @@ RANK 1: GULFSTREAM (BARGE) | Status: CONFIRMED SOURCE [MATCH]
       oilType: "Heavy Fuel Oil (HFO)",
       anomaly: "Capsized Hull - Continuous Point Source Leak"
     },
+    driftDirection: [-0.001, 0.002],  // Caribbean drift
     polygon: [
       [11.148, -60.802],
       [11.148, -60.775],
@@ -766,12 +772,12 @@ RANK 1: GULFSTREAM (BARGE) | Status: CONFIRMED SOURCE [MATCH]
 
 // ─── Vessel type config ───────────────────────────────────────────────────
 export const VESSEL_TYPE_CONFIG = {
-  Tanker:    { color:'#f87171', types:[80,81,82,83,84,85,86,87,88,89] },
-  Cargo:     { color:'#fbbf24', types:[70,71,72,73,74,75,76,77,78,79] },
-  Passenger: { color:'#c084fc', types:[60,61,62,63,64,65,66,67,68,69] },
-  Fishing:   { color:'#34d399', types:[30,31,32,33,34,35,36,37,38,39] },
-  Special:   { color:'#60a5fa', types:[50,51,52,53,54,55,56,57,58,59] },
-  Other:     { color:'#94a3b8', types:[] },
+  Tanker: { color: '#f87171', types: [80, 81, 82, 83, 84, 85, 86, 87, 88, 89] },
+  Cargo: { color: '#fbbf24', types: [70, 71, 72, 73, 74, 75, 76, 77, 78, 79] },
+  Passenger: { color: '#c084fc', types: [60, 61, 62, 63, 64, 65, 66, 67, 68, 69] },
+  Fishing: { color: '#34d399', types: [30, 31, 32, 33, 34, 35, 36, 37, 38, 39] },
+  Special: { color: '#60a5fa', types: [50, 51, 52, 53, 54, 55, 56, 57, 58, 59] },
+  Other: { color: '#94a3b8', types: [] },
 }
 
 export function getVesselCategory(shipType) {
@@ -800,18 +806,20 @@ export function getVesselTypeName(shipType) {
 }
 
 export function getNavStatusName(s) {
-  return { 0:'Under way (engine)',1:'At anchor',2:'Not under command',
-    3:'Restricted manoeuvrability',4:'Constrained by draught',5:'Moored',
-    6:'Aground',7:'Engaged in fishing',8:'Under way sailing',15:'Not defined',
+  return {
+    0: 'Under way (engine)', 1: 'At anchor', 2: 'Not under command',
+    3: 'Restricted manoeuvrability', 4: 'Constrained by draught', 5: 'Moored',
+    6: 'Aground', 7: 'Engaged in fishing', 8: 'Under way sailing', 15: 'Not defined',
   }[s] ?? `Status ${s}`
 }
 
 export function getFlagFromMMSI(mmsi) {
-  const mid = String(mmsi).slice(0,3)
-  return {'419':'🇮🇳 India','232':'🇬🇧 UK','538':'🇲🇭 Marshall Is.','229':'🇲🇹 Malta',
-    '566':'🇸🇬 Singapore','477':'🇭🇰 Hong Kong','636':'🇱🇷 Liberia','370':'🇵🇦 Panama',
-    '311':'🇧🇸 Bahamas','338':'🇺🇸 USA','503':'🇦🇺 Australia','440':'🇰🇷 S.Korea',
-    '677':'🇹🇿 Tanzania','257':'🇳🇴 Norway','354':'🇵🇦 Panama','357':'🇵🇦 Panama',
-    '355':'🇵🇦 Panama','247':'🇮🇹 Italy',
+  const mid = String(mmsi).slice(0, 3)
+  return {
+    '419': '🇮🇳 India', '232': '🇬🇧 UK', '538': '🇲🇭 Marshall Is.', '229': '🇲🇹 Malta',
+    '566': '🇸🇬 Singapore', '477': '🇭🇰 Hong Kong', '636': '🇱🇷 Liberia', '370': '🇵🇦 Panama',
+    '311': '🇧🇸 Bahamas', '338': '🇺🇸 USA', '503': '🇦🇺 Australia', '440': '🇰🇷 S.Korea',
+    '677': '🇹🇿 Tanzania', '257': '🇳🇴 Norway', '354': '🇵🇦 Panama', '357': '🇵🇦 Panama',
+    '355': '🇵🇦 Panama', '247': '🇮🇹 Italy',
   }[mid] ?? ''
 }

@@ -71,7 +71,6 @@ export default function AisPanel({ onClose, vessels, vesselScores, theme }) {
               <th style={{ padding: '10px 8px', fontSize: 10, color: c.muted, fontWeight: 700, textTransform: 'uppercase' }}>COG (deg)</th>
               <th style={{ padding: '10px 8px', fontSize: 10, color: c.muted, fontWeight: 700, textTransform: 'uppercase' }}>LAT</th>
               <th style={{ padding: '10px 8px', fontSize: 10, color: c.muted, fontWeight: 700, textTransform: 'uppercase' }}>LON</th>
-              <th style={{ padding: '10px 8px', fontSize: 10, color: c.muted, fontWeight: 700, textTransform: 'uppercase' }}>Destination</th>
             </tr>
           </thead>
           <tbody>
@@ -87,7 +86,6 @@ export default function AisPanel({ onClose, vessels, vesselScores, theme }) {
                 <td style={{ padding: '12px 8px', fontSize: 12, color: c.text }}>{v.cog?.toFixed(0) || '-'}</td>
                 <td style={{ padding: '12px 8px', fontSize: 12, color: c.text, fontFamily: 'monospace' }}>{v.lat?.toFixed(5)}</td>
                 <td style={{ padding: '12px 8px', fontSize: 12, color: c.text, fontFamily: 'monospace' }}>{v.lon?.toFixed(5)}</td>
-                <td style={{ padding: '12px 8px', fontSize: 12, color: c.muted }}>{v.destination || 'Unknown'}</td>
               </tr>
             ))}
           </tbody>

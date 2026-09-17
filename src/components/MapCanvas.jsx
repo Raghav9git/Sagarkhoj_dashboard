@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useCallback, useState, useMemo } from 'react'
-import { MapContainer, TileLayer, Polygon, Marker, Popup, Polyline, Tooltip, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Polygon, Marker, Popup, Polyline, Tooltip, useMap, CircleMarker } from 'react-leaflet'
 import L from 'leaflet'
 import { SlidersHorizontal, ChevronDown } from 'lucide-react'
 import {
@@ -116,6 +116,27 @@ function createVesselIcon(color, cog=0, isSelected=false, scoreTotal=null, isDar
   })
 }
 
+/* Arrow icon for flow lines */
+function createArrowIcon(angle, color) {
+  return L.divIcon({
+    html: `<svg width="10" height="10" viewBox="0 0 12 12" style="transform: rotate(${angle}deg); filter: drop-shadow(0 0 2px rgba(0,0,0,0.8));"><path d="M 6 0 L 12 12 L 6 9 L 0 12 Z" fill="${color}" opacity="0.85"/></svg>`,
+    className: '',
+    iconSize: [10, 10],
+    iconAnchor: [5, 5]
+  })
+}
+
+/* Bearing between two coords */
+function getBearing(lat1, lon1, lat2, lon2) {
+  const toRad = Math.PI / 180;
+  const toDeg = 180 / Math.PI;
+  const dLon = (lon2 - lon1) * toRad;
+  const y = Math.sin(dLon) * Math.cos(lat2 * toRad);
+  const x = Math.cos(lat1 * toRad) * Math.sin(lat2 * toRad) - 
+            Math.sin(lat1 * toRad) * Math.cos(lat2 * toRad) * Math.cos(dLon);
+  return (Math.atan2(y, x) * toDeg + 360) % 360;
+}
+
 function createPulseIcon() {
   return L.divIcon({
     html:`<div style="position:relative;width:16px;height:16px;"><div style="position:absolute;inset:0;border-radius:50%;border:2px solid #ef4444;background:rgba(239,68,68,0.2);"></div><div style="position:absolute;inset:5px;border-radius:50%;background:#ef4444;"></div></div>`,
@@ -136,7 +157,7 @@ function FlyToSpill({ activeSpill }) {
 }
 
 function ThemeTileLayer({ theme }) {
-  return <TileLayer key={theme} url={TILE_URLS[theme]} attribution={TILE_ATTR} maxZoom={18} />
+  return <TileLayer key={theme} url={TILE_URLS[theme]} attribution={TILE_ATTR} maxZoom={18} maxNativeZoom={16} />
 }
 
 /* ─── Vessel filter dock ──────────────────────────────────────────────────── */
@@ -219,9 +240,6 @@ function VesselTracebackSlider({ traceback, setTraceback, theme }) {
           <span style={{fontSize:7,fontWeight:700,color:txtMuted,letterSpacing:'0.14em',textTransform:'uppercase'}}>
             🚢 Vessel Traceback
           </span>
-          <span style={{fontSize:7,color:txtMuted,letterSpacing:'0.06em'}}>
-            AIS dead-reckoning up to 72h
-          </span>
         </div>
         <div style={{
           background:bgCol, borderRadius:8,
@@ -234,7 +252,7 @@ function VesselTracebackSlider({ traceback, setTraceback, theme }) {
         }}>{label}</div>
       </div>
       <input
-        type="range" min="-72" max="0" step="1" value={traceback}
+        type="range" min="-48" max="0" step="1" value={traceback}
         onChange={e=>setTraceback(Number(e.target.value))}
         style={{
           width:'100%', cursor:'pointer', margin:0, height:4,
@@ -243,17 +261,8 @@ function VesselTracebackSlider({ traceback, setTraceback, theme }) {
         }}
       />
       <div style={{display:'flex',justifyContent:'space-between',fontSize:7,color:txtMuted,marginTop:-6}}>
-        <span>-72h</span><span>-48h</span><span>-24h</span><span>Now</span>
+        <span>-48h</span><span>-24h</span><span>Now</span>
       </div>
-      {traceback < 0 && (
-        <div style={{
-          borderRadius:10, background:bgCol, boxShadow:insetShadow,
-          padding:'6px 12px', display:'flex', alignItems:'center', gap:10,
-        }}>
-          <svg width="30" height="6"><line x1="0" y1="3" x2="30" y2="3" stroke={isDark?'#94a3b8':'#475569'} strokeWidth="1.5" strokeDasharray="5 4"/></svg>
-          <span style={{fontSize:7,color:txtMuted}}>Vessel past track (SOG × COG)</span>
-        </div>
-      )}
     </div>
   )
 }
@@ -289,9 +298,6 @@ function SpillDriftSlider({ spillTraceback, setSpillTraceback, theme, isActive }
           <span style={{fontSize:7,fontWeight:700,color:'#f97316',letterSpacing:'0.14em',textTransform:'uppercase'}}>
             🛢️ Oil Spill Drift
           </span>
-          <span style={{fontSize:7,color:txtMuted,letterSpacing:'0.06em'}}>
-            Track spill dispersion over time
-          </span>
         </div>
         <div style={{
           background:bgCol, borderRadius:8,
@@ -304,7 +310,7 @@ function SpillDriftSlider({ spillTraceback, setSpillTraceback, theme, isActive }
         }}>{label}</div>
       </div>
       <input
-        type="range" min="0" max="72" step="6" value={spillTraceback}
+        type="range" min="0" max="48" step="6" value={spillTraceback}
         onChange={e=>setSpillTraceback(Number(e.target.value))}
         style={{
           width:'100%', cursor:'pointer', margin:0, height:4,
@@ -313,24 +319,15 @@ function SpillDriftSlider({ spillTraceback, setSpillTraceback, theme, isActive }
         }}
       />
       <div style={{display:'flex',justifyContent:'space-between',fontSize:7,color:txtMuted,marginTop:-6}}>
-        <span>Origin</span><span>+24h</span><span>+48h</span><span>+72h</span>
+        <span>Origin</span><span>+24h</span><span>+48h</span>
       </div>
-      {spillTraceback > 0 && (
-        <div style={{
-          borderRadius:10, background:bgCol, boxShadow:insetShadow,
-          padding:'6px 12px', display:'flex', alignItems:'center', gap:10,
-        }}>
-          <svg width="30" height="6"><line x1="0" y1="3" x2="30" y2="3" stroke="#f97316" strokeWidth="1.5" strokeDasharray="5 4"/></svg>
-          <span style={{fontSize:7,color:txtMuted}}>Oil drift path (Stokes 3.5% + Ekman 15°)</span>
-        </div>
-      )}
     </div>
   )
 }
 
 /* ─── Main MapCanvas ──────────────────────────────────────────────────────── */
 export default function MapCanvas({
-  spillResult, onVesselsUpdate, onVesselSelect, onScoresUpdate,
+  spillResult, allSpills, onVesselsUpdate, onVesselSelect, onScoresUpdate,
   theme, vesselFilter, onFilterChange, showHistorical, selectedIncident
 }) {
   const [vessels,      setVessels]      = useState(()=>{ const o={}; SEED_VESSELS.forEach(v=>{o[v.mmsi]={...v,isSeed:true}}); return o })
@@ -439,6 +436,7 @@ export default function MapCanvas({
   // ── Determine what to render on map ──────────────────────────────────────
   // Active spill: use spillResult directly (which is set by both live detection and historical selection)
   const activeSpill = spillResult?.detected ? spillResult : null
+  const spillsToRender = (allSpills && allSpills.length > 0) ? allSpills : (activeSpill ? [activeSpill] : [])
   
   // Vessels to show: merge live vessels with historical ships when relevant
   const vesselsToRender = useMemo(() => {
@@ -481,31 +479,6 @@ export default function MapCanvas({
     }
     return base
   }, [showHistorical, selectedIncident, filtered, spillResult])
-
-  // ── Oil spill drift: map slider (0..72h) to polygon index ────────────────
-  // driftPolygons has 13 steps (0 to 72h, every 6h)
-  const spillStepIndex = Math.min(12, Math.max(0, Math.floor(spillTraceback / 6)))
-  
-  let renderedPolygon = activeSpill?.polygon
-  let renderedCentroid = activeSpill?.centroid
-  
-  if (activeSpill?.driftPolygons?.length > 0) {
-    renderedPolygon = activeSpill.driftPolygons[spillStepIndex] || activeSpill.polygon
-    if (activeSpill?.driftPath?.length > spillStepIndex) {
-      renderedCentroid = activeSpill.driftPath[spillStepIndex + 1] || activeSpill.centroid
-    }
-  }
-
-  // ── Spill movement trail line (from origin to current drift position) ────
-  let spillMovementLine = null
-  if (activeSpill?.driftPath?.length > 0 && spillTraceback > 0) {
-    const endIdx = Math.min(spillStepIndex + 1, activeSpill.driftPath.length - 1)
-    spillMovementLine = activeSpill.driftPath.slice(0, endIdx + 1)
-  }
-
-  // ── Vessel traceback: map slider (-72..0) to historical step ─────────────
-  const historicalStepIndex = Math.min(4, Math.max(0, Math.floor((traceback + 72) / 18)))
-
   return (
     <div style={{width:'100%',height:'100%',position:'relative'}}>
       <VesselFilterDock vesselFilter={vesselFilter} onFilterChange={onFilterChange} theme={theme} counts={counts}/>
@@ -530,76 +503,131 @@ export default function MapCanvas({
         <ThemeTileLayer theme={theme}/>
         {activeSpill&&<FlyToSpill activeSpill={activeSpill}/>}
 
-        {/* ── Oil spill polygon (AI-detected shape, morphing with drift) ── */}
-        {renderedPolygon && renderedPolygon.length > 0 && (
-          <Polygon positions={renderedPolygon} pathOptions={{
-            color: isDark ? '#ef4444' : '#1f2937',
-            weight: 2,
-            opacity: 0.92,
-            fillColor: isDark ? '#7f1d1d' : '#374151',
-            fillOpacity: 0.42,
-            dashArray: '5,4',
-          }}>
-            <Popup className="custom-popup">
-              <div style={{padding:'8px 10px',fontFamily:'monospace',fontSize:11,minWidth:220}}>
-                <div style={{fontWeight:800,marginBottom:6,borderBottom:'1px solid rgba(255,255,255,0.1)',paddingBottom:4,color:'#ef4444'}}>
-                  🛢️ SAR Slick Forensics
-                </div>
-                <div><b>Surface Area:</b> {activeSpill?.area} sq km</div>
-                <div><b>Perimeter:</b> {activeSpill?.perimeter} km</div>
-                <div><b>Drift Time:</b> +{spillTraceback}h from origin</div>
-                <div><b>Polygon Vertices:</b> {renderedPolygon.length}</div>
-                {activeSpill?.suspects?.[0] && (
-                  <div style={{marginTop:6,padding:'4px',background:'rgba(239,68,68,0.1)',borderRadius:4,fontSize:10}}>
-                    <b>Primary Suspect:</b> {activeSpill.suspects[0].name}
-                    {activeSpill.suspects[0].isCulprit && <span style={{color:'#ef4444'}}> [CULPRIT]</span>}
-                  </div>
-                )}
-              </div>
-            </Popup>
-          </Polygon>
-        )}
+        {/* ── Spills Rendering Loop ── */}
+        {spillsToRender.map((spill, spillIndex) => {
+          const spillStepIndex = Math.min(12, Math.max(0, Math.floor(spillTraceback / 6)))
+          const originPolygon = spill.driftPolygons?.[0] || spill.polygon
+          
+          let currentDriftPolygon = null
+          if (spill.driftPolygons?.length > 1 && spillTraceback > 0) {
+            currentDriftPolygon = spill.driftPolygons[spillStepIndex] || null
+          }
+          let renderedCentroid = spill.centroid
+          if (currentDriftPolygon && spill.driftPath?.length > spillStepIndex) {
+            renderedCentroid = spill.driftPath[Math.min(spillStepIndex, spill.driftPath.length - 1)] || spill.centroid
+          }
 
-        {/* ── Spill origin marker ── */}
-        {activeSpill?.centroid && (
-          <Marker position={activeSpill.centroid} icon={createPulseIcon()}>
-            <Popup closeButton={false} className="custom-popup">
-              <div style={{padding:'8px 10px',fontFamily:'monospace',fontSize:11,minWidth:220}}>
-                <div style={{fontWeight:700,marginBottom:4}}>📍 Spill Origin Point</div>
-                <div>Detected: <b>{activeSpill?.detectedAt ? new Date(activeSpill.detectedAt).toUTCString?.()?.slice(0,25) + 'Z' : activeSpill.detectedAt || 'Unknown'}</b></div>
-                <div style={{marginTop:3}}>Est. origin: ~12h before detection</div>
-                <div style={{marginTop:4,color:'#94a3b8',fontSize:9}}>
-                  {activeSpill.centroid[0]?.toFixed(5)}°N, {activeSpill.centroid[1]?.toFixed(5)}°E
-                </div>
-              </div>
-            </Popup>
-          </Marker>
-        )}
+          return (
+            <React.Fragment key={`spillrender-${spillIndex}-${spill.benchmark_match || spill.detectedAt}`}>
+              {/* ── ORIGIN polygon — always visible (T=0 shape, ghost fill) ── */}
+              {originPolygon && originPolygon.length > 0 && (
+                <Polygon positions={originPolygon} pathOptions={{
+                  color: '#ef4444',
+                  weight: spillTraceback > 0 ? 1.5 : 2.5,
+                  opacity: spillTraceback > 0 ? 0.5 : 0.95,
+                  fillColor: '#7f1d1d',
+                  fillOpacity: spillTraceback > 0 ? 0.15 : 0.45,
+                  dashArray: spillTraceback > 0 ? '4,5' : '5,4',
+                }}>
+                  <Popup className="custom-popup">
+                    <div style={{padding:'8px 10px',fontFamily:'monospace',fontSize:11,minWidth:220}}>
+                      <div style={{fontWeight:800,marginBottom:6,borderBottom:'1px solid rgba(255,255,255,0.1)',paddingBottom:4,color:'#ef4444'}}>
+                        🛢️ Oil Spill — Origin Position (T=0)
+                      </div>
+                      <div><b>Surface Area:</b> {spill.area} sq km</div>
+                      <div><b>Perimeter:</b> {spill.perimeter} km</div>
+                      <div><b>Polygon Vertices:</b> {originPolygon.length}</div>
+                      {spill.suspects?.[0] && (
+                        <div style={{marginTop:6,padding:'4px',background:'rgba(239,68,68,0.1)',borderRadius:4,fontSize:10}}>
+                          <b>Primary Suspect:</b> {spill.suspects[0].name}
+                          {spill.suspects[0].isCulprit && <span style={{color:'#ef4444'}}> [CULPRIT]</span>}
+                        </div>
+                      )}
+                    </div>
+                  </Popup>
+                </Polygon>
+              )}
 
-        {/* ── Animated centroid marker (current drift position) ── */}
-        {renderedCentroid && spillTraceback > 0 &&
-          JSON.stringify(renderedCentroid) !== JSON.stringify(activeSpill?.centroid) && (
-          <Marker position={renderedCentroid} icon={createPulseIcon()}>
-            <Popup closeButton={false} className="custom-popup">
-              <div style={{padding:'6px 8px',fontFamily:'monospace',fontSize:11}}>
-                <div style={{fontWeight:700}}>🛢️ Slick Position at +{spillTraceback}h</div>
-                <div style={{color:'#94a3b8',fontSize:9,marginTop:4}}>
-                  {renderedCentroid[0]?.toFixed(5)}°N, {renderedCentroid[1]?.toFixed(5)}°E
-                </div>
-              </div>
-            </Popup>
-          </Marker>
-        )}
+              {/* ── CURRENT DRIFT SHAPES & PARTICLES ── */}
+              {spillTraceback > 0 && currentDriftPolygon && currentDriftPolygon.length > 0 && currentDriftPolygon.map((poly, idx) => (
+                <Polygon key={`driftpoly-${spillIndex}-${idx}`} positions={poly} pathOptions={{
+                  color: '#f97316', weight: 1, opacity: 0.3, fillColor: '#f97316', fillOpacity: 0.15, dashArray: '4,4'
+                }} />
+              ))}
+              {spillTraceback > 0 && spill.driftParticles?.[spillStepIndex] && (
+                <>
+                  {spill.driftParticles[spillStepIndex].map((p, idx) => (
+                    <CircleMarker
+                      key={`particle-${spillIndex}-${spillStepIndex}-${idx}`}
+                      center={[p.lat, p.lon]}
+                      radius={p.radius}
+                      pathOptions={{
+                        color: '#f97316',
+                        weight: 0,
+                        fillColor: '#f97316',
+                        fillOpacity: p.opacity,
+                      }}
+                    />
+                  ))}
+                </>
+              )}
 
-        {/* ── Spill movement trail (origin → current position) ── */}
-        {spillMovementLine && spillMovementLine.length > 1 && (
-          <Polyline
-            positions={spillMovementLine}
-            pathOptions={{color:'#f97316',weight:2.5,opacity:0.9,dashArray:'6,5'}}
-          />
-        )}
+              {/* ── Spill movement flow lines (Blue/white dashed paths with arrows) ── */}
+              {spillTraceback > 0 && spill.driftFlowLines && spill.driftFlowLines.map((line, idx) => {
+                const endIdx = Math.min(spillStepIndex, line.length - 1)
+                if (endIdx < 1) return null
+                const currentLine = line.slice(0, endIdx + 1)
+                const lastPt = currentLine[currentLine.length - 1]
+                const prevPt = currentLine[currentLine.length - 2]
+                const bearing = getBearing(prevPt[0], prevPt[1], lastPt[0], lastPt[1])
+                return (
+                  <React.Fragment key={`flowline-${spillIndex}-${idx}`}>
+                    <Polyline
+                      positions={currentLine}
+                      pathOptions={{ color: '#93c5fd', weight: 1, opacity: 0.35, dashArray: '3, 6' }}
+                    />
+                    <Marker
+                      position={lastPt}
+                      icon={createArrowIcon(bearing, 'rgba(147, 197, 253, 0.6)')}
+                    />
+                  </React.Fragment>
+                )
+              })}
 
-        {/* ── Live wind drift forecast line ── */}
+              {/* ── Spill ORIGIN marker (fixed, always at T=0) ── */}
+              {spill.centroid && (
+                <Marker position={spill.centroid} icon={createPulseIcon()}>
+                  <Popup closeButton={false} className="custom-popup">
+                    <div style={{padding:'8px 10px',fontFamily:'monospace',fontSize:11,minWidth:220}}>
+                      <div style={{fontWeight:700,marginBottom:4}}>📍 Spill Origin Point (T=0)</div>
+                      <div>Detected: <b>{spill.detectedAt ? new Date(spill.detectedAt).toUTCString().slice(0,25) + 'Z' : spill.detectedAt || 'Unknown'}</b></div>
+                      <div style={{marginTop:4,color:'#94a3b8',fontSize:9}}>
+                        {spill.centroid[0]?.toFixed(5)}°, {spill.centroid[1]?.toFixed(5)}°
+                      </div>
+                    </div>
+                  </Popup>
+                </Marker>
+              )}
+
+              {/* ── Current drift position marker (moves with slider) ── */}
+              {currentDriftPolygon && renderedCentroid &&
+                JSON.stringify(renderedCentroid) !== JSON.stringify(spill.centroid) && (
+                <Marker position={renderedCentroid} icon={createPulseIcon()}>
+                  <Popup closeButton={false} className="custom-popup">
+                    <div style={{padding:'6px 8px',fontFamily:'monospace',fontSize:11}}>
+                      <div style={{fontWeight:700,color:'#f97316'}}>🛢️ Slick at +{spillTraceback}h</div>
+                      <div style={{color:'#94a3b8',fontSize:9,marginTop:4}}>
+                        {renderedCentroid[0]?.toFixed(5)}°, {renderedCentroid[1]?.toFixed(5)}°
+                      </div>
+                    </div>
+                  </Popup>
+                </Marker>
+              )}
+            </React.Fragment>
+          )
+        })}
+
+        {/* ── Live wind drift forecast line (only at T=0, no slider active) ── */}
         {driftPath && driftPath.length > 1 && spillTraceback === 0 && (
           <Polyline
             positions={driftPath}

@@ -189,27 +189,47 @@ def generate_ocean_drift_polygons(base_polygon, lat_center, lon_center, drift_di
         
         drift_path.append([c_lat, c_lon])
         
-        # Scale factor: spill grows as it drifts (oil spreads over time)
-        # At T0 = original shape; at T12 = 40% larger
-        scale_factor = 1.0 + (step * 0.035)
+        # Scale factor: NO LONGER zooming out rapidly, oil dissipates and breaks
         
-        # Perturb shape slightly for realism (oil slick changes form)
-        noise_scale = 0.0008 * step
-        current_poly = []
-        for i, pt in enumerate(base_polygon):
-            p_lat, p_lon = pt[0], pt[1]
-            d_lat = p_lat - lat_center
-            d_lon = p_lon - lon_center
-            
-            # Perturbation: alternate vertices shift differently
-            noise_lat = noise_scale * (1.0 if i % 2 == 0 else -0.5)
-            noise_lon = noise_scale * (0.5 if i % 3 == 0 else -1.0)
-            
-            new_lat = c_lat + (d_lat * scale_factor) + noise_lat
-            new_lon = c_lon + (d_lon * scale_factor) + noise_lon
-            current_poly.append([round(new_lat, 5), round(new_lon, 5)])
+        # Perturb shape strongly for realism
+        noise_scale = 0.002 * step
         
-        drift_polygons.append(current_poly)
+        multi_poly = []
+        
+        # As time goes on (step increases), the slick breaks into more pieces (up to 3)
+        num_blobs = 1 if step == 0 else (2 if step < 4 else 3)
+        
+        for b in range(num_blobs):
+            # Simulate blobs drifting apart at different speeds
+            speed_multiplier = 1.5 if b == 1 else (0.7 if b == 2 else 1.0)
+            lateral_offset = dlon * 0.5 if b == 2 else (-dlon * 0.2 if b == 1 else 0)
+            
+            b_offset_lat = dlat * step * speed_multiplier
+            b_offset_lon = (dlon * step * speed_multiplier) + (lateral_offset * step)
+            
+            # Sub-blobs are smaller, and overall slick shrinks slowly
+            b_scale = (0.8 if b == 0 else (0.4 if b == 1 else 0.3)) * (1.0 - (step * 0.02))
+            
+            blob = []
+            for i, pt in enumerate(base_polygon):
+                p_lat, p_lon = pt[0], pt[1]
+                
+                # Local coordinates relative to center
+                d_lat = (p_lat - lat_center)
+                d_lon = (p_lon - lon_center)
+                
+                # Perturbation: alternate vertices shift differently
+                noise_lat = noise_scale * (1.5 if (i+b) % 2 == 0 else -1.0)
+                noise_lon = noise_scale * (1.0 if (i+b) % 3 == 0 else -1.5)
+                
+                new_lat = lat_center + b_offset_lat + (d_lat * b_scale) + noise_lat
+                new_lon = lon_center + b_offset_lon + (d_lon * b_scale) + noise_lon
+                blob.append([round(new_lat, 5), round(new_lon, 5)])
+                
+            # Wrap in an array to make it a valid GeoJSON-like multipolygon for Leaflet
+            multi_poly.append(blob)
+            
+        drift_polygons.append(multi_poly)
     
     return drift_path, drift_polygons
 
@@ -331,13 +351,13 @@ def segment_image():
         is_spill = bool(active_pixels > 50)
 
         # ── Step 3: Determine location and polygon ──
+        base_polygon = None
         if benchmark_id and benchmark_id in BENCHMARK_DATA:
             bdata = BENCHMARK_DATA[benchmark_id]
             lat_center = bdata["lat"]
             lon_center = bdata["lon"]
             detected_at = bdata["date"]
             suspects_list = bdata["ships"]
-            base_polygon = bdata["polygon"]
             drift_dir = bdata["drift_direction"]
             is_spill = True  # Always true for benchmarks
         else:
@@ -352,23 +372,48 @@ def segment_image():
                     "sog": 10.2, "cog": 145
                 }
             ]
-            # Generate polygon from NN mask
-            base_polygon = None
             drift_dir = (-0.001, 0.003)  # default NE drift
-            
-            if is_spill:
-                contours, _ = cv2.findContours(pred_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                if contours:
-                    largest = max(contours, key=cv2.contourArea)
-                    pts = []
-                    for pt in largest:
-                        px, py = pt[0]
-                        lat_pt = lat_center + (1.0 - py / 256.0) * 0.05
-                        lon_pt = lon_center + (px / 256.0) * 0.10
-                        pts.append(Point(lon_pt, lat_pt))
-                    base_polygon = create_valid_polygon_coords(pts, lat_center, lon_center)
 
-            if not base_polygon:
+        # Generate polygon directly from AI prediction mask
+        if is_spill:
+            contours, _ = cv2.findContours(pred_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            if contours:
+                largest = max(contours, key=cv2.contourArea)
+                # Simplify shape slightly to reduce points but keep exact morphology
+                epsilon = 0.005 * cv2.arcLength(largest, True)
+                approx = cv2.approxPolyDP(largest, epsilon, True)
+                
+                M = cv2.moments(largest)
+                if M['m00'] != 0:
+                    cx = int(M['m10']/M['m00'])
+                    cy = int(M['m01']/M['m00'])
+                else:
+                    cx, cy = 128, 128
+
+                # If this is a benchmark, anchor the AI shape exactly to the center of the known-water polygon
+                anchor_lat, anchor_lon = lat_center, lon_center
+                if benchmark_id and benchmark_id in BENCHMARK_DATA:
+                    b_poly = BENCHMARK_DATA[benchmark_id]["polygon"]
+                    if b_poly and len(b_poly) > 0:
+                        anchor_lat = sum(p[0] for p in b_poly) / len(b_poly)
+                        anchor_lon = sum(p[1] for p in b_poly) / len(b_poly)
+
+                pts = []
+                for pt in approx:
+                    px, py = pt[0]
+                    # Map pixels to lat/lon around the center (1 px = ~0.0005 deg)
+                    d_lon = (px - cx) * 0.0005
+                    d_lat = (cy - py) * 0.0005
+                    pts.append([round(anchor_lat + d_lat, 5), round(anchor_lon + d_lon, 5)])
+                
+                if len(pts) >= 3:
+                    base_polygon = pts
+
+        # Fallback if no valid polygon could be extracted from mask but we DO have a spill
+        if not base_polygon and is_spill:
+            if benchmark_id and benchmark_id in BENCHMARK_DATA:
+                base_polygon = BENCHMARK_DATA[benchmark_id]["polygon"]
+            else:
                 d = 0.025
                 base_polygon = [
                     [lat_center + d, lon_center - d * 1.2],

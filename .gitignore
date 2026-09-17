@@ -25,3 +25,16 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Python and Backend
+venv/
+__pycache__/
+*.pyc
+backend/__pycache__/
+backend/data/ais/*.csv
+backend/data/sar/*.tif
+backend/data/sar/*.zip
+backend/data/weather/*.nc
+
+# OS
+Thumbs.db
