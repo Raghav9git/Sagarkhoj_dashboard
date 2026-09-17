@@ -38,3 +38,4 @@ backend/data/weather/*.nc
 
 # OS
 Thumbs.db
+backend/model.pth
