@@ -22,53 +22,70 @@ export default function App() {
   const [showHistorical, setShowHistorical] = useState(false)
   
   // Sidebar tabs state
-  const [activeTab,      setActiveTab]      = useState(null)
+  const [activeTab, setActiveTab] = useState(null)
 
   const toggleTheme = useCallback(() => setTheme(t => t === 'night' ? 'day' : 'night'), [])
 
   const handleSpillDetected = useCallback((data) => {
+    // Always close the SAR panel and show results on map
+    setActiveTab(null)
+    
     if (data?.benchmark_match) {
+      // Find the matching historical incident to get full data (polygon, ships, etc.)
       const matched = HISTORICAL_INCIDENTS.find(i => i.id === data.benchmark_match)
       if (matched) {
         setSelectedIncident(matched)
         setShowHistorical(true)
-        if (data?.polygon && data.polygon.length > 0) {
-          setSpillResult({
-            detected: true,
-            is_spill: data.is_spill,
-            centroid: data.centroid || SPILL_CENTER,
-            polygon:  data.polygon || SPILL_POLYGON,
-            heatmap:  data.heatmap_image,
-            panel:    data.panel_image,
-            area:     data.area_sq_km,
-            perimeter:data.perimeter_km,
-            suspects: data.suspect_vessels || [],
-            driftPath: data.drift_path || [],
-            driftPolygons: data.drift_polygons || [],
-            detectedAt: data.detected_at || Date.now(),
-          })
-        }
-        setActiveTab('report')
+        
+        // Use the backend polygon if available, otherwise fall back to constants polygon
+        const polygon = (data.polygon && data.polygon.length > 0) ? data.polygon : matched.polygon
+        const driftPolygons = (data.drift_polygons && data.drift_polygons.length > 0)
+          ? data.drift_polygons
+          : null
+        const driftPath = (data.drift_path && data.drift_path.length > 0)
+          ? data.drift_path
+          : null
+
+        setSpillResult({
+          detected: true,
+          is_spill: true,
+          benchmark_match: data.benchmark_match,
+          centroid: data.centroid || matched.center,
+          polygon: polygon,
+          heatmap:  data.heatmap_image,
+          panel:    data.panel_image,
+          area:     data.area_sq_km || matched.metrics?.area,
+          perimeter: data.perimeter_km || matched.metrics?.perimeter,
+          suspects: matched.ships || data.suspect_vessels || [],
+          driftPath: driftPath || [matched.center],
+          driftPolygons: driftPolygons || [polygon],
+          detectedAt: data.detected_at || matched.date,
+          briefingText: matched.briefingText,
+        })
         return
       }
     }
 
-    if (data?.polygon && data.polygon.length > 0) {
+    // Live unknown image
+    if (data?.is_spill && data?.polygon && data.polygon.length > 0) {
+      setShowHistorical(false)
       setSpillResult({
         detected: true,
-        is_spill: data.is_spill,
+        is_spill: true,
         centroid: data.centroid || SPILL_CENTER,
-        polygon:  data.polygon || SPILL_POLYGON,
+        polygon:  data.polygon,
         heatmap:  data.heatmap_image,
         panel:    data.panel_image,
         area:     data.area_sq_km,
-        perimeter:data.perimeter_km,
+        perimeter: data.perimeter_km,
         suspects: data.suspect_vessels || [],
         driftPath: data.drift_path || [],
         driftPolygons: data.drift_polygons || [],
         detectedAt: data.detected_at || Date.now(),
       })
     } else {
+      // No spill or backend failure
+      setShowHistorical(false)
       setSpillResult({
         detected: true,
         is_spill: false,
@@ -82,8 +99,29 @@ export default function App() {
         driftPolygons: []
       })
     }
-    // Automatically open the report dashboard
-    setActiveTab('report')
+  }, [])
+
+  // When user selects a historical incident from dropdown, load it properly
+  const handleHistoricalSelect = useCallback((incident) => {
+    setSelectedIncident(incident)
+    setShowHistorical(true)
+    // Also load the incident data into spillResult so the map updates
+    setSpillResult({
+      detected: true,
+      is_spill: true,
+      benchmark_match: incident.id,
+      centroid: incident.center,
+      polygon: incident.polygon,
+      heatmap: null,
+      panel: incident.panelImage || null,
+      area: incident.metrics?.area,
+      perimeter: incident.metrics?.perimeter,
+      suspects: incident.ships || [],
+      driftPath: [incident.center],
+      driftPolygons: [incident.polygon],
+      detectedAt: incident.date,
+      briefingText: incident.briefingText,
+    })
   }, [])
 
   const handleVesselsUpdate  = useCallback((vessels) => { setActiveVessels(vessels); setAisConnected(true) }, [])
@@ -121,7 +159,7 @@ export default function App() {
               theme={theme}
               onPreviewReady={handlePreviewReady}
               selectedIncident={selectedIncident}
-              setSelectedIncident={setSelectedIncident}
+              setSelectedIncident={(inc) => { setSelectedIncident(inc); handleHistoricalSelect(inc) }}
               showHistorical={showHistorical}
               setShowHistorical={setShowHistorical}
               historicalIncidents={HISTORICAL_INCIDENTS}

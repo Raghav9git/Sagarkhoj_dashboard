@@ -165,7 +165,7 @@ function exportPDF(spillResult, selectedIncident, suspectsList) {
 
 /* ─── Main Component ─────────────────────────────────────────────────────── */
 export default function ReportDashboard({ onClose, theme, spillResult, selectedIncident, vesselScores, isVisible }) {
-  const [activeTab, setActiveTab] = useState('reports')
+  const [activeTab, setActiveTab] = useState('overview')
   const [showDownloadMenu, setShowDownloadMenu] = useState(false)
   const downloadRef = useRef(null)
   const isDark = theme === 'night'
@@ -356,7 +356,7 @@ export default function ReportDashboard({ onClose, theme, spillResult, selectedI
           {/* Scrollable body */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '14px 18px' }}>
 
-            {activeTab === 'reports' && (
+            {activeTab === 'overview' && (
               <>
                 {/* Visual Imagery Banner: Live Heatmap or Historical 2-Panel Segmentation */}
                 {(spillResult?.heatmap || selectedIncident?.segmentationImage || selectedIncident?.image) && (
@@ -517,79 +517,79 @@ export default function ReportDashboard({ onClose, theme, spillResult, selectedI
             )}
 
             {activeTab === 'forensics' && (
-              <div style={{ background: c.card, borderRadius: 9, padding: '20px 24px', border: `1px solid ${c.border}`, fontFamily: 'monospace', fontSize: 12, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
-                <div style={{ marginBottom: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {/* Show imagery panels */}
+                <div style={{ display: 'flex', gap: 14, flexDirection: 'column' }}>
+                  {/* 3-panel from backend or benchmark */}
                   {(isHistorical ? selectedIncident?.panelImage : spillResult?.panel) && (
                     <div style={{ border: `1px solid ${c.border}`, borderRadius: 9, overflow: 'hidden' }}>
-                      <img src={isHistorical ? selectedIncident?.panelImage : spillResult.panel} style={{ width: '100%', display: 'block', objectFit: 'contain', background: '#0a0d14' }} alt="SAR 3-Panel Analysis" />
+                      <div style={{ background: c.barBg, padding: '7px 12px', fontSize: 11, fontWeight: 700, borderBottom: `1px solid ${c.border}` }}>
+                        DeepLabV3+ 3-Panel Model Validation
+                      </div>
+                      <img
+                        src={isHistorical ? selectedIncident?.panelImage : spillResult.panel}
+                        style={{ width: '100%', display: 'block', objectFit: 'contain', background: '#0a0d14', maxHeight: 200 }}
+                        alt="SAR 3-Panel Analysis"
+                      />
                     </div>
                   )}
-                  <div style={{ border: `1px solid ${c.border}`, borderRadius: 9, overflow: 'hidden' }}>
-                    <img src={isHistorical ? (selectedIncident?.segmentationImage || spillResult?.heatmap || selectedIncident?.image) : spillResult?.heatmap} style={{ width: '100%', display: 'block', maxHeight: 300, objectFit: 'contain', background: '#0a0d14' }} alt="SAR Image Overlay" />
-                  </div>
+                  {/* Segmentation heatmap */}
+                  {(isHistorical ? (selectedIncident?.segmentationImage || selectedIncident?.image) : spillResult?.heatmap) && (
+                    <div style={{ border: `1px solid ${c.border}`, borderRadius: 9, overflow: 'hidden' }}>
+                      <div style={{ background: c.barBg, padding: '7px 12px', fontSize: 11, fontWeight: 700, borderBottom: `1px solid ${c.border}` }}>
+                        AI Detection Imagery — SAR Segmentation Overlay
+                      </div>
+                      <img
+                        src={isHistorical ? (selectedIncident.segmentationImage || selectedIncident.image) : spillResult?.heatmap}
+                        style={{ width: '100%', display: 'block', maxHeight: 220, objectFit: 'contain', background: '#0a0d14' }}
+                        alt="SAR Image Overlay"
+                      />
+                    </div>
+                  )}
                 </div>
-                {isHistorical && selectedIncident?.briefingText ? selectedIncident.briefingText : (
-                  <>
-                    <div style={{ textAlign: 'center', marginBottom: 20, color: c.accent, fontWeight: 700 }}>
-                      =====================================================================================<br/>
-                      🔍 MARITIME FORENSIC & HYDRODYNAMIC ANALYSIS BRIEFING<br/>
-                      =====================================================================================
-                    </div>
 
-                    <div style={{ marginBottom: 16 }}>
-                      <div style={{ fontWeight: 800, color: c.text }}>[SECTION 1: SATELLITE SAR GEOMETRIC & DETECTION METRICS]</div>
-                      <div style={{ color: c.muted }}>-------------------------------------------------------------------------------------</div>
-                      <div>• Selected Incident Benchmark : Live Unknown Spill</div>
-                      <div>• Incident Region / Location  : Uncharted Waters</div>
-                      <div>• Primary Sensor Platform     : Sentinel-1 C-Band SAR (IW Mode)</div>
-                      <div>• Detection Timestamp (T_det) : {new Date(spillResult?.detectedAt || Date.now()).toUTCString()}</div>
-                      <div>• Calculated Slick Centroid  : Lat {activeSpill?.centroid?.[0]?.toFixed(4)}°, Lon {activeSpill?.centroid?.[1]?.toFixed(4)}°</div>
-                      <div>• Estimated Slick Area        : {area}</div>
-                      <div>• Estimated Slick Perimeter   : {perimeter}</div>
-                      <div>• Target Anomaly Profile      : Transponder Blackout (Dark Fleet)</div>
-                    </div>
-
-                    <div style={{ marginBottom: 16 }}>
-                      <div style={{ fontWeight: 800, color: c.text }}>[SECTION 2: METOCEAN PHYSICAL FORCING DATA & OCEAN CONDITIONS]</div>
-                      <div style={{ color: c.muted }}>-------------------------------------------------------------------------------------</div>
-                      <div>• Active MetOcean Source Profile : TIER 1: Google Drive Persistent Cache (.json)</div>
-                      <div>• Atmospheric Wind Velocity (10m): u = -6.2939 m/s | v = 2.9349 m/s</div>
-                      <div>• Surface Ocean Current Velocity : u = 0.6375 m/s | v = -0.1949 m/s</div>
-                      <div>• Calculated Drift Resultant Speed: 0.6667 m/s</div>
-                      <div>• Hydrodynamic Physics Engine  : OpenDrift 4D Particle Lagrangian (RK4 Integration)</div>
-                    </div>
-
-                    <div style={{ marginBottom: 16 }}>
-                      <div style={{ fontWeight: 800, color: c.text }}>[SECTION 3: 4D LAGRANGIAN HINDCASTING & VIRTUAL RELEASE SPILL LOCATION]</div>
-                      <div style={{ color: c.muted }}>-------------------------------------------------------------------------------------</div>
-                      <div>• Hindcast Window Start Time   : T - 48 Hours</div>
-                      <div>• Estimated Point of Release   : Lat {(activeSpill?.centroid?.[0] - 0.024)?.toFixed(4) || 0}°, Lon {(activeSpill?.centroid?.[1] + 0.036)?.toFixed(4) || 0}°</div>
-                      <div>• Particle Dispersion Spread   : 1,500 particles seeded over 1.5 km radius</div>
-                    </div>
-
-                    <div style={{ marginBottom: 16 }}>
-                      <div style={{ fontWeight: 800, color: c.text }}>[SECTION 4: REGIONAL AIS TRAFFIC INTERSECTION & SPATIO-TEMPORAL AUDIT]</div>
-                      <div style={{ color: c.muted }}>-------------------------------------------------------------------------------------</div>
-                      <div>• Total Unique Vessels Tracked : {suspectsList.length} candidate ships in spatio-temporal window</div>
-                    </div>
-
-                    <div style={{ marginBottom: 16 }}>
-                      <div style={{ fontWeight: 800, color: c.text }}>[SECTION 5: FINAL ATTRIBUTION RANKING MATRIX & FORENSIC VERDICT]</div>
-                      <div style={{ color: c.muted }}>=====================================================================================</div>
-                      {suspectsList.map((s, idx) => (
-                        <div key={idx} style={{ marginBottom: 12 }}>
-                          <div style={{ color: s.isCulprit ? c.danger : c.accent, fontWeight: 800 }}>
-                            RANK {s.rank || (idx + 1)}: {(s.name || `MMSI ${s.id || s.mmsi}`).toUpperCase()} (MMSI: {s.id || s.mmsi}) | Status: {s.isCulprit ? 'CONFIRMED CULPRIT [MATCH]' : 'CLEARED VESSEL'}
+                {/* Forensic briefing text — full 6 sections */}
+                <div style={{
+                  background: c.card, borderRadius: 9,
+                  padding: '16px 20px', border: `1px solid ${c.border}`,
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 11, lineHeight: 1.7,
+                  color: c.muted, overflowY: 'auto', maxHeight: 360
+                }}>
+                  {/* Header */}
+                  <div style={{ textAlign: 'center', marginBottom: 16, color: c.accent, fontWeight: 700, fontSize: 12 }}>
+                    ═══════════════════════════════════════════════════════════════════<br/>
+                    🔍 MARITIME FORENSIC & HYDRODYNAMIC ANALYSIS BRIEFING<br/>
+                    ═══════════════════════════════════════════════════════════════════
+                  </div>
+                  {/* Get briefing text from spillResult (benchmark match) or selectedIncident */}
+                  {(() => {
+                    const text = spillResult?.briefingText || selectedIncident?.briefingText
+                    if (text) {
+                      // Render the text with section headers highlighted
+                      const lines = text.split('\n')
+                      return lines.map((line, i) => {
+                        const isSection = line.includes('[SECTION') || line.startsWith('═') || line.startsWith('RANK') || line.startsWith('✔') || line.startsWith('[VERDICT')
+                        const isCulprit = line.includes('[MATCH]') || line.includes('CONFIRMED')
+                        const isLabel = line.startsWith('├─') || line.startsWith('└─')
+                        return (
+                          <div key={i} style={{
+                            color: isCulprit ? '#ef4444' : isSection ? '#60a5fa' : isLabel ? c.muted : c.muted,
+                            fontWeight: isSection ? 700 : 400,
+                            marginBottom: line === '' ? 4 : 0,
+                          }}>
+                            {line || '\u00a0'}
                           </div>
-                          <div>├─ Vessel Type        : {s.type || 'Unknown'}</div>
-                          <div>├─ Composite Anomaly  : {(s.score || s.confidence || 0).toFixed(1)} / 100 Risk Score</div>
-                          <div>└─ Forensic Rationale : {s.isCulprit ? 'Direct spatial intersection with OpenDrift origin cloud. Speed drop pattern detected near incident centroid.' : 'Transited regional shipping lane. Speed pattern consistent with standard navigation.'}</div>
-                          <div style={{ color: c.muted }}>-------------------------------------------------------------------------------------</div>
+                        )
+                      })
+                    } else {
+                      return (
+                        <div style={{ color: c.muted, fontStyle: 'italic', textAlign: 'center', padding: '20px 0' }}>
+                          No forensic briefing available. Upload an image or select a historical case.
                         </div>
-                      ))}
-                    </div>
-                  </>
-                )}
+                      )
+                    }
+                  })()}
+                </div>
               </div>
             )}
           </div>

@@ -65,17 +65,21 @@ export default function SarPanel({ onClose, onSpillDetected, isProcessing, setIs
       setDone(true)
       if (data && data.status === 'success') {
         onSpillDetected(data)
+        // Auto-close panel after 800ms so user can see map with results
+        setTimeout(() => onClose?.(), 800)
       } else {
         onSpillDetected()
+        setTimeout(() => onClose?.(), 800)
       }
     } catch (err) {
       console.warn('Backend API connection failed, using fallback detection:', err)
       setDone(true)
       onSpillDetected()
+      setTimeout(() => onClose?.(), 800)
     } finally {
       setIsProcessing(false)
     }
-  }, [file, isProcessing, onSpillDetected, setIsProcessing])
+  }, [file, isProcessing, onSpillDetected, setIsProcessing, onClose])
 
   // Fetch wind data for spill location (same source as oil drift line)
   useEffect(() => {
@@ -149,28 +153,46 @@ export default function SarPanel({ onClose, onSpillDetected, isProcessing, setIs
 
         {/* Historical Dropdown */}
         {showHistorical && (
-          <div style={{ marginTop: 10 }}>
+          <div style={{ marginTop: 10, display:'flex', flexDirection:'column', gap:6 }}>
             <select 
               value={selectedIncident?.id || ''} 
               onChange={e => {
                 const inc = historicalIncidents.find(i => i.id === e.target.value);
-                if (inc) setSelectedIncident(inc);
+                if (inc) setSelectedIncident(inc); // This calls handleHistoricalSelect in App.jsx
               }}
               style={{
                 width: '100%',
-                padding: '4px 6px',
-                borderRadius: 4,
+                padding: '6px 8px',
+                borderRadius: 6,
                 background: c.iconBg,
                 border: `1px solid ${c.border}`,
                 color: c.text,
                 fontSize: 10,
-                outline: 'none'
+                outline: 'none',
+                cursor: 'pointer'
               }}
             >
               {historicalIncidents?.map(inc => (
                 <option key={inc.id} value={inc.id}>{inc.name}</option>
               ))}
             </select>
+            {selectedIncident && (
+              <button
+                onClick={() => {
+                  onClose?.() // Close panel and fly to the incident on the map
+                }}
+                style={{
+                  width:'100%', padding:'7px 12px',
+                  display:'flex', alignItems:'center', justifyContent:'center', gap:6,
+                  background:'rgba(239,68,68,0.12)',
+                  border:'1px solid rgba(239,68,68,0.3)',
+                  color:'#ef4444', fontSize:10, fontWeight:700,
+                  borderRadius:6, cursor:'pointer',
+                }}
+              >
+                📍 View on Map
+              </button>
+            )}
           </div>
         )}
       </div>
