@@ -57,7 +57,7 @@ export default function SarPanel({ onClose, onSpillDetected, isProcessing, setIs
     try {
       const formData = new FormData()
       formData.append('image', file)
-      const res = await fetch('http://localhost:5000/api/segment', {
+      const res = await fetch('https://sagarkhoj-backend-production.up.railway.app/api/segment', {
         method: 'POST',
         body: formData
       })
